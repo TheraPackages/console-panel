@@ -42,4 +42,4 @@ Clears whole console.
 
 ## Used
 
-[image](https://github.com/spark/console-panel)
+[consolepanle](https://github.com/spark/console-panel)
