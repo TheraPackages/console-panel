@@ -1,63 +1,45 @@
-# Atom Console package
+# Console panel package
 
-**This isn't a terminal**. It's only a log console. Great for showing compilation output, long responses or general logs.
+a thera console view, which allows you to log text using static calls, to easily exec command line
 
-![Screenshot](https://github.com/spark/console-panel/raw/master/resources/screenshot.png)
-
-## Usage
-
-By itself package doesn't do anything but it provides a service other packages can consume:
-
-`package.json`
-```json
-"consumedServices": {
-  "console-panel": {
-    "versions": {
-      "^1.0.0": "consumeConsolePanel"
-    }
-  }
-}
-```
-
-`main.coffee`
-```coffeescript
-consumeConsolePanel: (@consolePanel) ->
-
-log: (message) ->
-	@consolePanel.log(message)
-```
+[image](https://img.alicdn.com/tps/TB1OG1tPVXXXXagXFXXXXXXXXXX-562-300.png)
 
 ## API reference
 
-When consuming console panel you'll get instance of `ConsoleManager` which has following methods:
+When consuming console panel you'll get instance of ConsoleManager which has following methods:
 
-###### toggle()
+' toggle() '
+
 Toggles console panel.
 
-###### log(message, level='info')
-Logs a message. `message` can be `String` or a custom `View` that will be appended.
+' log(message, level='info') '
 
-###### error(message)
+Logs a message. message can be String or a custom View that will be appended.
+
+' error(message) '
+
 Logs an error.
 
-###### warn(message)
+' warn(message) '
+
 Logs a warning.
 
-###### notice(message)
+' notice(message) '
+
 Logs a notice.
 
-###### debug(message)
+' debug(message) '
+
 Logs an debug message.
 
-###### raw(rawText, level='info', lineEnding="\n")
-Logs a raw message. `rawText` will be split by `lineEnding` and each line will be added separately as `level`.
+' raw(rawText, level='info', lineEnding="\n") '
 
-###### clear()
+Logs a raw message. rawText will be split by lineEnding and each line will be added separately as level.
+
+' clear() '
+
 Clears whole console.
 
-## TODO
+## Used
 
-* Write specs
-* Add level filtering
-* Show timestamp
-* "Go to latest" button
+![console-panel](https://github.com/spark/console-panel）
