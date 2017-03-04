@@ -2,7 +2,7 @@
 
 a thera console view, which allows you to log text using static calls, to easily exec command line
 
-[image](https://img.alicdn.com/tps/TB1OG1tPVXXXXagXFXXXXXXXXXX-562-300.png)
+![](https://img.alicdn.com/tps/TB1OG1tPVXXXXagXFXXXXXXXXXX-562-300.png)
 
 ## API reference
 
