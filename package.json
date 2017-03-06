@@ -71,5 +71,14 @@
     "type": "git",
     "url": "git+https://github.com/spark/console-panel.git"
   },
+  "activationCommands": {
+    "atom-workspace": [
+      "console:toggle",
+      "console.targets",
+      "console:log",
+      "server:log",
+      "console:devicelog"
+    ]
+  },
   "version": "0.2.2"
 }

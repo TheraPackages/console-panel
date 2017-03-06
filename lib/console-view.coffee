@@ -79,8 +79,7 @@ class ConsoleView extends View
     @body4SubPreview.height serializeState?.height
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
 
-    atom.workspace.addBottomPanel(item: @element, priority: 100)
-    @hide()
+    @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
 
 
@@ -101,6 +100,7 @@ class ConsoleView extends View
     @disposables?.dispose()
 
   show: ->
+    @panel.show()
     $('#atom-console').show('blind', null, 300, null)
 
   hide: ->
