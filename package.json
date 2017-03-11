@@ -71,7 +71,7 @@
     "type": "git",
     "url": "git+https://github.com/spark/console-panel.git"
   },
-  "activationCommands": {
+  "---activationCommands": {
     "atom-workspace": [
       "console:toggle",
       "console.targets",

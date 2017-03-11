@@ -13,18 +13,6 @@ class ConsoleView extends View
         #@button class: 'btn pull-right', click: 'clear', 'Clear'
         @div class: 'panel-heading panel-simulator-info', =>
           @select class: 'target-selector', name: 'targetSelect', outlet: 'targetSelect', =>
-            # @option value: 'device', 'device', selected: true
-            # @option value: 'H60-L01 iphone', 'H60-L01 iphone'
-          # @span class:'fa fa-apple',style:"color:rgb(160,160,160)"
-          # @span 'iPhone7 Plus',style:"color:rgb(160,160,160)"
-          # @span '-',style:"color:rgb(160,160,160)"
-          # @span '10.1.1(14B100)',style:"color:rgb(160,160,160)"
-          # @span '-',style:"color:rgb(160,160,160)"
-          # @span '1080x1920',style:"color:rgb(160,160,160)"
-          # @span ' '
-          # @span class:'fa fa-wifi',style:"color:rgb(194,194,194)"
-          # @span '192.168.1.199:8888',style:"color:rgb(194,194,194)"
-          # @span ' '
           @span class:'fa fa-heartbeat',style:"color:rgb(60,184,121)"
           @span 'Oreo-Server was running',style:"color:rgb(60,184,121)", id: 'oreo-server-status'
 
@@ -220,20 +208,13 @@ class ConsoleView extends View
   resizeView: ({which, pageY}) =>
     return @resizeStopped() unless which is 1
 
-    # @selectedTab = $('#tabs').tabs('option', 'active')
+    console.log(pageY)
 
-    # if @selectedTab == 0
-    #   @body.height($(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2)
-    # else if @selectedTab == 1
-    #   console.log "todo.."
-    # else
-    #   @body4Device.height($(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2)
     @tabHeight = $(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2
     tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Device, @body4SubPreview]
 
 
   resizeToFitContent: ->
-
     @selectedTab = $('#tabs').tabs('option', 'active')
     if @selectedTab == 0
       @body.height(1) # Shrink to measure the minimum width of list

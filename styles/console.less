@@ -3,7 +3,6 @@
 // See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
 // for a full listing of what's available.
 @import "ui-variables";
-// @import url("./hover.css");
 
 .panel-title-info{
 	background: rgb(24,29,34);
@@ -56,48 +55,10 @@
 	}
 
 	.view-scroller {
-		height: 100%;
+		// height: 200px;
 		width: 100%;
 		overflow: auto;
 	}
-
-	.panel-body {
-		// height: 200px;
-		background-color: rgb(29,31,33);
-		cursor: text;
-		-webkit-user-select: text;
-
-		pre {
-			&:empty {
-				padding: 0;
-			}
-			font-size:14px;
-			background: rgb(29,31,33);
-			border-width: 0 !important;
-		}
-
-		p {
-			margin: 0;
-
-			&.level-error {
-				color: @text-color-error;
-			}
-
-			&.level-warn {
-				color: @text-color-warning;
-			}
-
-			&.level-notice {
-				color: @text-color-info;
-			}
-
-			&.level-debug {
-				color: @text-color-subtle;
-			}
-		}
-	}
-}
-
 
 .ui-tabs{
 	zoom: 1;
@@ -149,7 +110,7 @@
 	border-width: 0 !important;
 	background: rgb(29,31,33) !important;
 	position: relative;
-	min-height: 100px;
+	// min-height: 100px;
 }
 
 
@@ -196,5 +157,45 @@ a.mover{
 	color: rgb(116,148,163);
 	font-size: 20px !important;
 	cursor: pointer;
+}
 
+#atom-console {
+	width: 100%;
+}
+
+.panel-body {
+	height: 200px;
+	background-color: rgb(29,31,33);
+	cursor: text;
+	-webkit-user-select: text;
+
+	pre {
+		&:empty {
+			padding: 0;
+		}
+		font-size:14px;
+		background: rgb(29,31,33);
+		border-width: 0 !important;
+	}
+
+	p {
+		margin: 0;
+
+		&.level-error {
+			color: @text-color-error;
+		}
+
+		&.level-warn {
+			color: @text-color-warning;
+		}
+
+		&.level-notice {
+			color: @text-color-info;
+		}
+
+		&.level-debug {
+			color: @text-color-subtle;
+		}
+	}
+}
 }
