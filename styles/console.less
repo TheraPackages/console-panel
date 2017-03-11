@@ -60,6 +60,43 @@
 		overflow: auto;
 	}
 
+	.panel-body {
+		height: 200px;
+		background-color: rgb(29,31,33);
+		cursor: text;
+		-webkit-user-select: text;
+
+		pre {
+			&:empty {
+				padding: 0;
+			}
+			font-size:14px;
+			background: rgb(29,31,33);
+			border-width: 0 !important;
+		}
+
+		p {
+			margin: 0;
+
+			&.level-error {
+				color: @text-color-error;
+			}
+
+			&.level-warn {
+				color: @text-color-warning;
+			}
+
+			&.level-notice {
+				color: @text-color-info;
+			}
+
+			&.level-debug {
+				color: @text-color-subtle;
+			}
+		}
+	}
+}
+
 .ui-tabs{
 	zoom: 1;
 	background: rgb(14,17,18);
@@ -161,41 +198,4 @@ a.mover{
 
 #atom-console {
 	width: 100%;
-}
-
-.panel-body {
-	height: 200px;
-	background-color: rgb(29,31,33);
-	cursor: text;
-	-webkit-user-select: text;
-
-	pre {
-		&:empty {
-			padding: 0;
-		}
-		font-size:14px;
-		background: rgb(29,31,33);
-		border-width: 0 !important;
-	}
-
-	p {
-		margin: 0;
-
-		&.level-error {
-			color: @text-color-error;
-		}
-
-		&.level-warn {
-			color: @text-color-warning;
-		}
-
-		&.level-notice {
-			color: @text-color-info;
-		}
-
-		&.level-debug {
-			color: @text-color-subtle;
-		}
-	}
-}
 }
