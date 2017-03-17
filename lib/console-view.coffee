@@ -40,6 +40,10 @@ class ConsoleView extends View
         @div id:'tabs-1', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body', =>
             @pre class: 'native-key-bindings', outlet: 'output', tabindex: -1
+            @div class: 'input-bar', =>
+              @span class: 'fa fa-chevron-right'
+              @div => # https://www.zhihu.com/question/37208845
+                @input class: 'native-key-bindings', type: 'text', outlet: 'input'
 
         @div id:'tabs-2', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4Debugger', =>
@@ -66,6 +70,9 @@ class ConsoleView extends View
     @body4Device.height serializeState?.height
     @body4SubPreview.height serializeState?.height
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
+
+    @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
+    @input[0].addEventListener('keydown', (e) => @inputConfirmed(e))
 
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
@@ -188,8 +195,54 @@ class ConsoleView extends View
     else
       @output4Device.empty()
 
+  setDebugService: (service) ->
+    @debugService = service
+    # subscribe service message here
+    # service
 
-    #@hide()
+  inputChanged: (view) ->
+    # TODO: suggest prompt here
+    # console.log(view.value, view)
+
+  inputConfirmed: (e) ->
+    if e.keyCode == 13  # Enter pressed
+      value = @input[0].value
+      @input[0].value = ''
+      if value
+        @log("> " + value, 'debug')
+        @evaluateExpression(value)
+
+  evaluateExpression: (expression) ->
+    if not @debugService
+      @log('Evaluation service not available!', 'error')
+      return
+    try
+      promise = @debugService.runtimeEvaluate(expression, 'REPL')
+      promise.then((res) => @evaluateSuccess(res)).catch((err) => @evaluateFail(err));
+    catch error
+      console.error(error);
+
+  # RemoteObject
+  evaluateSuccess: (res) ->
+    console.log(res)
+    if not res
+      return
+    if not res.hasChildren()
+      @log(res.value, 'debug')
+    else
+      @log('RemoteObject: ' + res.objectId, 'debug')
+
+  # string or exception RemoteObject
+  evaluateFail: (err) ->
+    console.log(err);
+    if not err
+      return
+    if typeof err == 'string'
+      @log(err, 'error')
+    else if typeof err == 'object'
+      @log(err.description + ' id=' + err.objectId, 'error')
+    else
+      @log(JSON.strinify(err), 'error')
 
   handleEvents: ->
     @on 'dblclick', '.view-resize-handle', =>
@@ -230,19 +283,24 @@ class ConsoleView extends View
     now = new Date
     year = '' + now.getFullYear()
     month = '' + (now.getMonth() + 1)
+    day = '' + now.getDate()
+    hour = '' + now.getHours()
+    minute = '' + now.getMinutes()
+    second = '' + now.getSeconds()
+    millis = '' + now.getMilliseconds()
+
     if month.length == 1
       month = '0' + month
-    day = '' + now.getDate()
     if day.length == 1
       day = '0' + day
-    hour = '' + now.getHours()
     if hour.length == 1
       hour = '0' + hour
-    minute = '' + now.getMinutes()
     if minute.length == 1
       minute = '0' + minute
-    second = '' + now.getSeconds()
     if second.length == 1
       second = '0' + second
+    if millis.length < 3
+      millis = (if millis.length == 2 then '0' else '00') + millis
 
-    year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
+    "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
+    # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()

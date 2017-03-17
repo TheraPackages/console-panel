@@ -11,6 +11,7 @@ Array::last ?= (n) ->
 module.exports = Console =
   consoleView: null
   subscriptions: null
+  debuggerService: null
 
   activate: (state) ->
     @consoleView = new ConsoleView(state.consoleViewState)
@@ -45,3 +46,7 @@ module.exports = Console =
 
   provideConsolePanel: ->
     @consoleManager
+
+  cosumeDebugService: (service) ->
+    console.log('Consume debugger service:', service.name)
+    @consoleView.setDebugService(service);

@@ -43,8 +43,8 @@
     "atom-space-pen-views": "^2.0.3",
     "event-kit": "^1.0.0",
     "q": "~1.0.1",
-    "jquery":"2.1.4"
-
+    "jquery":"2.1.4",
+    "thera-debug-common-types": "~0.1.4"
   },
   "description": "Read only log console panel",
   "devDependencies": {},
@@ -62,6 +62,14 @@
       "description": "Read only log console",
       "versions": {
         "1.0.0": "provideConsolePanel"
+      }
+    }
+  },
+  "consumedServices": {
+    "thera-debug-protocol": {
+      "description": "",
+      "versions": {
+        "1.0.0": "cosumeDebugService"
       }
     }
   },
