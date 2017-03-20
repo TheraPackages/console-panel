@@ -6,6 +6,7 @@ require './jquery-ui.js'
 module.exports =
 class ConsoleView extends View
   @selectTab:1
+  replId: 0
   @content: ->
     @div id: 'atom-console', class: 'view-resizer panel',outlet: 'atomConsole', =>
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
@@ -40,10 +41,10 @@ class ConsoleView extends View
         @div id:'tabs-1', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body', =>
             @pre class: 'native-key-bindings', outlet: 'output', tabindex: -1
-            @div class: 'input-bar', =>
-              @span class: 'fa fa-chevron-right'
-              @div => # https://www.zhihu.com/question/37208845
-                @input class: 'native-key-bindings', type: 'text', outlet: 'input'
+          @div class: 'repl-bar', =>
+            @span class: 'fa fa-chevron-right'
+            @div => # https://www.zhihu.com/question/37208845
+              @input class: 'native-key-bindings', type: 'text', outlet: 'input'
 
         @div id:'tabs-2', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4Debugger', =>
@@ -151,6 +152,8 @@ class ConsoleView extends View
     if typeof message == 'string'
       @output.append $$ ->
         @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+    else if typeof message == 'object' and message.evalLog
+      @evalObject(message, level)
     else
       @output.append message
 
@@ -214,7 +217,7 @@ class ConsoleView extends View
 
   evaluateExpression: (expression) ->
     if not @debugService
-      @log('Evaluation service not available!', 'error')
+      @log('Debug service not available!', 'error')
       return
     try
       promise = @debugService.runtimeEvaluate(expression, 'REPL')
@@ -227,22 +230,134 @@ class ConsoleView extends View
     console.log(res)
     if not res
       return
-    if not res.hasChildren()
-      @log(res.value, 'debug')
-    else
-      @log('RemoteObject: ' + res.objectId, 'debug')
+    res.evalLog = true
+    @log(res, 'debug')
 
   # string or exception RemoteObject
   evaluateFail: (err) ->
     console.log(err);
     if not err
       return
-    if typeof err == 'string'
+    if typeof err == 'object' and err.objectId
+      err.evalLog = true
       @log(err, 'error')
-    else if typeof err == 'object'
-      @log(err.description + ' id=' + err.objectId, 'error')
+    else if typeof err == 'string'
+      @log(err, 'error')
     else
-      @log(JSON.strinify(err), 'error')
+      @log(JSON.stringify(err), 'error')
+
+  getReplId: ->
+    return ++@replId
+
+  expandClick: (holder, view) ->
+    icon = holder.parent().prev()[0]
+    icon.classList.remove('evaluate-result-expand-icon')
+    icon.classList.remove('evaluate-result-collapse-icon')
+    icon.classList.remove('fa-plus-square')
+    icon.classList.remove('fa-minus-square')
+    if holder.children().length > 0
+      console.log('Children count = ' + holder.children().length)
+      holder.toggle()
+      icon.classList.add(if holder.is(':visible') then 'evaluate-result-collapse-icon' else 'evaluate-result-expand-icon')
+      icon.classList.add(if holder.is(':visible') then 'fa-minus-square' else 'fa-plus-square')
+      return false
+
+    data = view.data
+    if data?.objectId
+      @getProperties(holder, data.objectId)
+      holder.show()
+      icon.classList.add('fa-minus-square')
+      icon.classList.add('evaluate-result-collapse-icon')
+    else
+      console.error('Primitive object cannot be expanded', data)
+    return false
+
+  getProperties: (holder, objectId) ->
+    if not @debugService
+      @log('Debug service not available !', 'error');
+      return
+    else if not objectId
+      @log('objectId cannot be empty !', 'error')
+      return
+    try
+      promise = @debugService.getProperties(objectId)
+      promise.then((res) => @propertySuccess(holder, res)).catch((err) => @propertyFail(holder, err));
+    catch error
+      console.error(error)
+
+  propertySuccess: (holder, res) ->
+    console.log(holder, res)
+    for prop in res
+      @propObject(holder, prop)
+
+  propertyFail: (holder, err) ->
+    console.log(holder, err)
+
+  # message {
+  #   className: undefined
+  #   description: "DedicatedWorkerGlobalScope"
+  #   evalLog: true
+  #   objectId: '{"injectedScriptId":3,"id":106}'
+  #   subtype: undefined
+  #   type: "object"
+  #   value: undefined
+  # }
+  evalObject: (object, level) ->
+    id = @getReplId()
+    rowId = 'eval-expand-' + id
+    holderId = 'eval-expand-holder-' + id
+    self = this
+    hasChildren = object.objectId and object.type != 'symbol'
+    if hasChildren
+      @output.append $$ ->
+        @div class: 'eval-block', id: rowId, =>
+          # plus-square minus-square
+          @span class: 'fa fa-plus-square evaluate-result-expand-icon'
+          @div =>
+            @p class: '', object.className || object.description
+            @div style: 'display: none', id: holderId
+      $ ->
+        holder = $('#'+holderId)
+        $('#'+rowId).click(object, self.expandClick.bind(self, holder))
+    else
+      @output.append $$ ->
+        @p class: 'level-' + level, object.value + '' # Primitive value
+
+
+  propObject: (holder, prop) ->
+    id = @getReplId()
+    rowId = 'prop-expand-' + id
+    holderId = 'prop-expand-holder-' + id
+    self = this
+    # Extract string representing the object value
+    value = prop.value
+    hasChildren = value.objectId and value.type != 'symbol'
+    if hasChildren
+      valStr = value.className || value.description
+    else
+      valStr = '' + value.value
+    # Render value to ui
+    if hasChildren
+      holder.append $$ ->
+        @div class: 'eval-block', id: rowId, =>
+          @span class: 'fa fa-plus-square evaluate-result-expand-icon'
+          @div =>
+            @p class: '', prop.name + ": " + valStr
+            @div id: holderId
+      $ ->
+        holder = $('#'+holderId)
+        $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
+    else
+      holder.append $$ ->
+        @div class: 'eval-block', id: rowId, =>
+          @span class: 'evaluate-result-empty-icon'
+          @div =>
+            @p class: '', prop.name + ": " + valStr
+            @div id: holderId
+      $ ->
+        holder = $('#'+holderId)
+        $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
+
 
   handleEvents: ->
     @on 'dblclick', '.view-resize-handle', =>

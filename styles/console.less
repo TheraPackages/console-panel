@@ -70,6 +70,7 @@
 			&:empty {
 				padding: 0;
 			}
+			margin: 0px;
 			font-size:14px;
 			background: rgb(29,31,33);
 			border-width: 0 !important;
@@ -94,10 +95,20 @@
 				color: @text-color-subtle;
 			}
 		}
+
+		span {
+			margin: 0;
+			display: block;
+			// word-break: normal;
+			// width: auto;
+			// white-space: pre-wrap;
+			// word-wrap: break-word;
+			// overflow: hidden;
+		}
 	}
 }
 
-.input-bar {
+.repl-bar {
 	span {
 		width: 16px;
 		height: 16px;
@@ -120,6 +131,37 @@
 			background-color: #4a7ce9;
 			color: #ffffff;
 		}
+	}
+}
+
+.evaluate-result-expand-icon {
+  color: hsl(60, 70%, 50%);
+	text-align: center;
+  font-size: 12px !important;
+	width: 20px;
+	padding-top: 4px;
+}
+
+.evaluate-result-collapse-icon {
+	color: hsl(40, 70%, 50%);
+	text-align: center;
+  font-size: 12px !important;
+	width: 20px;
+	padding-top: 4px;
+}
+
+.evaluate-result-empty-icon {
+	width: 20px;
+	padding-top: 4px;
+}
+
+.eval-block {
+	span {
+		float: left;
+	}
+	div {
+		overflow: hidden;
+		height: auto;
 	}
 }
 
