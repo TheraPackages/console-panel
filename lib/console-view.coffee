@@ -322,7 +322,7 @@ class ConsoleView extends View
     else
       @output.append $$ ->
         @p class: 'level-' + level, object.value + '' # Primitive value
-
+    @body.scrollTop(@body[0].scrollHeight)
 
   propObject: (holder, prop) ->
     id = @getReplId()
