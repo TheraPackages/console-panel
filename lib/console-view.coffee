@@ -1,7 +1,9 @@
 {$, $$, View} = require 'atom-space-pen-views'
 $ = window.$ = window.jQuery = require 'jquery'
 require './jquery-ui.js'
-
+fs = require 'fs'
+{spawn, exec, execSync} = require 'child_process'
+{resolve, dirname, extname, sep} = require 'path'
 
 module.exports =
 class ConsoleView extends View
@@ -28,10 +30,10 @@ class ConsoleView extends View
               @span class:'fa fa-bug'
 
           @li class:'button hvr-hang' ,=>
-            @a href:'#tabs-3',' Device', =>
-              @span class:'fa fa-tablet'
+            @a href:'#tabs-3',' Terminal', =>
+              @span class:'fa fa-terminal'
 
-          @li class:'button hvr-hang' ,=>
+          @li class:'button hvr-hang', style: 'visible: hidden', =>
             @a href:'#tabs-4',' Preview-Device', =>
               @span class:'fa fa-bars'
 
@@ -51,8 +53,12 @@ class ConsoleView extends View
             @pre class: 'native-key-bindings', outlet: 'output4Debugger', tabindex: -1
 
         @div id:'tabs-3', =>
-          @div class: 'panel-body closed view-scroller', outlet: 'body4Device', =>
-            @pre class: 'native-key-bindings', outlet: 'output4Device', tabindex: -1
+          @div class: 'panel-body closed view-scroller', outlet: 'body4Term', =>
+            @pre class: 'native-key-bindings', outlet: 'output4Term', tabindex: -1
+            @div class: 'term-bar', =>
+              @p  'shell$', outlet: 'termShell', =>
+              @div => # https://www.zhihu.com/question/37208845
+                @input class: 'native-key-bindings', type: 'text', outlet: 'term'
 
         @div id:'tabs-4', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4SubPreview', =>
@@ -68,12 +74,13 @@ class ConsoleView extends View
   initialize: (serializeState) ->
     @body.height serializeState?.height
     @body4Debugger.height serializeState?.height
-    @body4Device.height serializeState?.height
+    @body4Term.height serializeState?.height
     @body4SubPreview.height serializeState?.height
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
 
     @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
     @input[0].addEventListener('keydown', (e) => @inputConfirmed(e))
+    @term[0].addEventListener('keydown', (e) => @termConfirmed(e))
 
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
@@ -175,16 +182,16 @@ class ConsoleView extends View
 
   log4Device: (message, level) ->
     # if $('#atom-console').is(":visible")
-    at_bottom = (@body4Device.scrollTop() + @body4Device.innerHeight() + 10 > @body4Device[0].scrollHeight)
+    at_bottom = (@body4Term.scrollTop() + @body4Term.innerHeight() + 10 > @body4Term[0].scrollHeight)
 
     if typeof message == 'string'
-      @output4Device.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+      @output4Term.append $$ ->
+        @p class: 'level-' + level, message
     else
-      @output4Device.append message
+      @output4Term.append message
 
     if at_bottom
-      @body4Device.scrollTop(@body4Device[0].scrollHeight)
+      @body4Term.scrollTop(@body4Term[0].scrollHeight)
       #@show()
 
 
@@ -195,8 +202,11 @@ class ConsoleView extends View
       @output.empty()
     else if @selectedTab == 1
       @output4Debugger.empty()
+    else if @selectedTab == 2
+      @output4Term.empty()
     else
-      @output4Device.empty()
+      @output4SubPreview.empty()
+
 
   setDebugService: (service) ->
     @debugService = service
@@ -358,6 +368,32 @@ class ConsoleView extends View
         holder = $('#'+holderId)
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
 
+  termConfirmed: (e) ->
+    if e.keyCode == 13  # Enter pressed
+      cmd = @term[0].value
+      @log4Device(@termShell[0].innerHTML + ' ' + cmd, 'debug')
+      @term[0].value = ''
+      trimCmd = $.trim(cmd) || ''
+      if trimCmd == 'cls' or trimCmd == 'clear'
+        @clear()
+      else if trimCmd.startsWith('cd') and trimCmd.split('/\s+/g')[0] == 'cd'
+        @cd(Array.prototype.slice.call(trimCmd.split('/\s+/g'), 1))
+      else if trimCmd
+        exec(trimCmd, {}, (error, stdout, stderr) => @termCallback(error, stdout, stderr))
+
+  termCallback: (error, stdout, stderr) ->
+    if error
+      console.error(error)
+      @log4Device(stderr, 'error')
+    else
+      @log4Device(stdout, 'debug')
+
+  getCwd: ->
+    return '.'
+
+  cd: (args) ->
+    args = [atom.project.getPaths()[0]] if not args[0]
+    console.log(atom.project.getPaths())
 
   handleEvents: ->
     @on 'dblclick', '.view-resize-handle', =>
@@ -379,7 +415,7 @@ class ConsoleView extends View
     console.log(pageY)
 
     @tabHeight = $(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2
-    tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Device, @body4SubPreview]
+    tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Term, @body4SubPreview]
 
 
   resizeToFitContent: ->
@@ -390,8 +426,8 @@ class ConsoleView extends View
     else if @selectedTab == 1
       console.log "todo.."
     else
-      @body4Device.height(1) # Shrink to measure the minimum width of list
-      @body4Device.height(@body4Device.find('>').outerHeight())
+      @body4Term.height(1) # Shrink to measure the minimum width of list
+      @body4Term.height(@body4Term.find('>').outerHeight())
 
 
   js_yyyy_mm_dd_hh_mm_ss = ->
