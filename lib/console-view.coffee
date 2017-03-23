@@ -79,7 +79,6 @@ class ConsoleView extends View
     @handleEvents()
 
 
-
   # Returns an object that can be retrieved when package is activated
   # serialize: ->
     #test use it...
@@ -89,7 +88,6 @@ class ConsoleView extends View
     #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
     #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
     #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['#define FeLogError(format,...)        writeCinLog(__FUNCTION__,CinLogLevelError,format,##__VA_ARGS__)','error'])
-
 
   # Tear down any state and detach
   destroy: ->
@@ -102,48 +100,42 @@ class ConsoleView extends View
   hide: ->
     $('#atom-console').hide('blind', null, 300, null)
 
-
   toggle: ->
     if $('#atom-console').is(":visible")
       @hide()
     else
       @show()
 
-  targetChanged: (selector) ->
-    selectedOption = selector.options[selector.options.selectedIndex];
-    target = selectedOption.tag;
-    atom.commands.dispatch(atom.views.getView(atom.workspace), "thera-debugger:debugger:main-device", target);
+  handleEvents: ->
+    @on 'dblclick', '.view-resize-handle', =>
+      @resizeToFitContent()
 
-  updateTargets: (targets) ->
-    targets = targets || [];
-    selectView = @targetSelect[0];  # <select/>
-    options = selectView.options    # [<option/>]
-    # Remember current selected target.
-    selectedOption = options[options.selectedIndex]
-    selectedTarget = if selectedOption then selectedOption.tag else null
+    @on 'mousedown', '.view-resize-handle', (e) => @resizeStarted(e)
 
-    prvTargetIndex = -1; # Previous connected target is still there.
-    @targetSelect.empty()
-    for target, i in targets
-      do (target, i) =>
-        option = document.createElement('option')
-        option.text = "#{target.model} - #{target.deviceId.split('|')[1]} - #{target.weexVersion}"
-        option.val = target.deviceId
-        option.tag = target
-        selectView.add(option);
-        if selectedTarget and selectedTarget.deviceId == target.deviceId
-          prvTargetIndex = i;
+  resizeStarted: =>
+    $(document).on('mousemove', @resizeView)
+    $(document).on('mouseup', @resizeStopped)
 
-    if targets.length == 0  # Clear shadow...
-      selectView.add(document.createElement('option'))
-      @targetSelect.empty()
+  resizeStopped: =>
+    $(document).off('mousemove', @resizeView)
+    $(document).off('mouseup', @resizeStopped)
 
-    if prvTargetIndex >= 0      # Keep previous selected option
-      selectView.options[prvTargetIndex].selected = true
-    else if targets.length > 0  # Select first option by default
-      selectView.options[0].selected = true
-      @targetChanged(selectView)
+  resizeView: ({which, pageY}) =>
+    return @resizeStopped() unless which is 1
+    @tabHeight = $(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2
+    tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Device, @body4SubPreview]
 
+
+  resizeToFitContent: ->
+    @selectedTab = $('#tabs').tabs('option', 'active')
+    if @selectedTab == 0
+      @body.height(1) # Shrink to measure the minimum width of list
+      @body.height(@body.find('>').outerHeight())
+    else if @selectedTab == 1
+      console.log "todo.."
+    else
+      @body4Device.height(1) # Shrink to measure the minimum width of list
+      @body4Device.height(@body4Device.find('>').outerHeight())
 
   log: (message, level) ->
     # if $('#atom-console').is(":visible")
@@ -197,6 +189,68 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
+
+  js_yyyy_mm_dd_hh_mm_ss = ->
+    now = new Date
+    year = '' + now.getFullYear()
+    month = '' + (now.getMonth() + 1)
+    day = '' + now.getDate()
+    hour = '' + now.getHours()
+    minute = '' + now.getMinutes()
+    second = '' + now.getSeconds()
+    millis = '' + now.getMilliseconds()
+
+    if month.length == 1
+      month = '0' + month
+    if day.length == 1
+      day = '0' + day
+    if hour.length == 1
+      hour = '0' + hour
+    if minute.length == 1
+      minute = '0' + minute
+    if second.length == 1
+      second = '0' + second
+    if millis.length < 3
+      millis = (if millis.length == 2 then '0' else '00') + millis
+
+    "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
+    # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
+
+
+  targetChanged: (selector) ->
+    selectedOption = selector.options[selector.options.selectedIndex];
+    target = selectedOption.tag;
+    atom.commands.dispatch(atom.views.getView(atom.workspace), "thera-debugger:debugger:main-device", target);
+
+  updateTargets: (targets) ->
+    targets = targets || [];
+    selectView = @targetSelect[0];  # <select/>
+    options = selectView.options    # [<option/>]
+    # Remember current selected target.
+    selectedOption = options[options.selectedIndex]
+    selectedTarget = if selectedOption then selectedOption.tag else null
+
+    prvTargetIndex = -1; # Previous connected target is still there.
+    @targetSelect.empty()
+    for target, i in targets
+      do (target, i) =>
+        option = document.createElement('option')
+        option.text = "#{target.model} - #{target.deviceId.split('|')[1]} - #{target.weexVersion}"
+        option.val = target.deviceId
+        option.tag = target
+        selectView.add(option);
+        if selectedTarget and selectedTarget.deviceId == target.deviceId
+          prvTargetIndex = i;
+
+    if targets.length == 0  # Clear shadow...
+      selectView.add(document.createElement('option'))
+      @targetSelect.empty()
+
+    if prvTargetIndex >= 0      # Keep previous selected option
+      selectView.options[prvTargetIndex].selected = true
+    else if targets.length > 0  # Select first option by default
+      selectView.options[0].selected = true
+      @targetChanged(selectView)
 
   setDebugService: (service) ->
     @debugService = service
@@ -357,65 +411,3 @@ class ConsoleView extends View
       $ ->
         holder = $('#'+holderId)
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
-
-
-  handleEvents: ->
-    @on 'dblclick', '.view-resize-handle', =>
-      @resizeToFitContent()
-
-    @on 'mousedown', '.view-resize-handle', (e) => @resizeStarted(e)
-
-  resizeStarted: =>
-    $(document).on('mousemove', @resizeView)
-    $(document).on('mouseup', @resizeStopped)
-
-  resizeStopped: =>
-    $(document).off('mousemove', @resizeView)
-    $(document).off('mouseup', @resizeStopped)
-
-  resizeView: ({which, pageY}) =>
-    return @resizeStopped() unless which is 1
-
-    console.log(pageY)
-
-    @tabHeight = $(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2
-    tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Device, @body4SubPreview]
-
-
-  resizeToFitContent: ->
-    @selectedTab = $('#tabs').tabs('option', 'active')
-    if @selectedTab == 0
-      @body.height(1) # Shrink to measure the minimum width of list
-      @body.height(@body.find('>').outerHeight())
-    else if @selectedTab == 1
-      console.log "todo.."
-    else
-      @body4Device.height(1) # Shrink to measure the minimum width of list
-      @body4Device.height(@body4Device.find('>').outerHeight())
-
-
-  js_yyyy_mm_dd_hh_mm_ss = ->
-    now = new Date
-    year = '' + now.getFullYear()
-    month = '' + (now.getMonth() + 1)
-    day = '' + now.getDate()
-    hour = '' + now.getHours()
-    minute = '' + now.getMinutes()
-    second = '' + now.getSeconds()
-    millis = '' + now.getMilliseconds()
-
-    if month.length == 1
-      month = '0' + month
-    if day.length == 1
-      day = '0' + day
-    if hour.length == 1
-      hour = '0' + hour
-    if minute.length == 1
-      minute = '0' + minute
-    if second.length == 1
-      second = '0' + second
-    if millis.length < 3
-      millis = (if millis.length == 2 then '0' else '00') + millis
-
-    "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
-    # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
