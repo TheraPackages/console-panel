@@ -8,7 +8,7 @@ class ConsoleView extends View
   @selectTab:1
   replId: 0
   @content: ->
-    @div id: 'atom-console', class: 'view-resizer panel',outlet: 'atomConsole', =>
+    @div id: 'atom-console', class: 'view-resizer panel', outlet: 'atomConsole', =>
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
       @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading', =>
         #@button class: 'btn pull-right', click: 'clear', 'Clear'
@@ -18,7 +18,7 @@ class ConsoleView extends View
           @span 'Oreo-Server was running',style:"color:rgb(60,184,121)", id: 'oreo-server-status'
 
 
-      @div id:'tabs',style:"background:rgb(14,17,18);border-width:0", =>
+      @div id:'tabs',style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
         @ul outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
@@ -66,11 +66,12 @@ class ConsoleView extends View
       return
 
   initialize: (serializeState) ->
-    @body.height serializeState?.height
-    @body4Debugger.height serializeState?.height
-    @body4Device.height serializeState?.height
-    @body4SubPreview.height serializeState?.height
+    @tabHeight = serializeState?.height || 200
+    tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
+    tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
+    $ ->  # Bring the whole bottom panel front to overlay panes's file tab.
+      $('#atom-console').parent().parent().addClass('z-index-3')
 
     @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
     @input[0].addEventListener('keydown', (e) => @inputConfirmed(e))
@@ -112,9 +113,11 @@ class ConsoleView extends View
 
     @on 'mousedown', '.view-resize-handle', (e) => @resizeStarted(e)
 
-  resizeStarted: =>
+  resizeStarted: ({pageY}) =>
     $(document).on('mousemove', @resizeView)
     $(document).on('mouseup', @resizeStopped)
+    @resizeStartY = pageY   # Remember the down pos for calculate offset when moving
+    @resizeStartHeight = @tabHeight
 
   resizeStopped: =>
     $(document).off('mousemove', @resizeView)
@@ -122,9 +125,16 @@ class ConsoleView extends View
 
   resizeView: ({which, pageY}) =>
     return @resizeStopped() unless which is 1
-    @tabHeight = $(document.body).height() - pageY - @heading.outerHeight() - @selectTabUl.outerHeight() - @resizeHandle.outerHeight()*2
-    tab.height(@tabHeight) for tab in [@body, @body4Debugger, @body4Device, @body4SubPreview]
+    @tabHeight = (@resizeStartY - pageY) + @resizeStartHeight
+    @tabHeight = 0 if @tabHeight < 0
 
+    atomConsole = $('#atom-console')  # 26 for status bar at bottom
+    # If panel has reach the top? 26px for status bar, 3px for margin
+    if atomConsole.offset().top + atomConsole.outerHeight() + 26 + 3 >= $(document.body).height() and pageY <= atomConsole.offset().top
+      @tabHeight = $(document.body).height() - atomConsole.offset().top - @heading.outerHeight() - @selectTabUl.outerHeight() - 26 - 4
+
+    tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
+    tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
 
   resizeToFitContent: ->
     @selectedTab = $('#tabs').tabs('option', 'active')
