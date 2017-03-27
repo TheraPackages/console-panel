@@ -75,7 +75,6 @@ class ConsoleView extends View
 
     @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
     @input[0].addEventListener('keydown', (e) => @inputKeyDown(e))
-    @input[0].addEventListener('keyup', (e) => @inputKeyUp(e))
     @replHistory = new ReplHistory()
 
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
@@ -287,9 +286,6 @@ class ConsoleView extends View
       @input[0].value = @replHistory.next()
     else if e.keyCode == 9  # Tab pressed
       console.log(e)
-
-  inputKeyUp: (e) ->
-    console.log(e)
 
   evaluateExpression: (expression) ->
     if not @debugService
