@@ -1,7 +1,7 @@
 {$, $$, View} = require 'atom-space-pen-views'
 $ = window.$ = window.jQuery = require 'jquery'
 require './jquery-ui.js'
-
+{ ReplHistory } = require './console-repl'
 
 module.exports =
 class ConsoleView extends View
@@ -74,7 +74,9 @@ class ConsoleView extends View
       $('#atom-console').parent().parent().addClass('z-index-3')
 
     @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
-    @input[0].addEventListener('keydown', (e) => @inputConfirmed(e))
+    @input[0].addEventListener('keydown', (e) => @inputKeyDown(e))
+    @input[0].addEventListener('keyup', (e) => @inputKeyUp(e))
+    @replHistory = new ReplHistory()
 
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
@@ -271,13 +273,23 @@ class ConsoleView extends View
     # TODO: suggest prompt here
     # console.log(view.value, view)
 
-  inputConfirmed: (e) ->
-    if e.keyCode == 13  # Enter pressed
+  inputKeyDown: (e) ->
+    if e.keyCode == 13      # Enter pressed
       value = @input[0].value
       @input[0].value = ''
       if value
         @log("> " + value, 'debug')
         @evaluateExpression(value)
+        @replHistory.add(value)
+    else if e.keyCode == 38 # ArrowUp pressed
+      @input[0].value = @replHistory.prev()
+    else if e.keyCode == 40 # ArrowDown pressed
+      @input[0].value = @replHistory.next()
+    else if e.keyCode == 9  # Tab pressed
+      console.log(e)
+
+  inputKeyUp: (e) ->
+    console.log(e)
 
   evaluateExpression: (expression) ->
     if not @debugService
