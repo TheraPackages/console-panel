@@ -47,6 +47,7 @@ module.exports = Console =
   provideConsolePanel: ->
     @consoleManager
 
-  cosumeDebugService: (service) ->
-    console.log('Consume debugger service:', service.name)
-    @consoleView.setDebugService(service);
+  # Service container: [weex, luaview]
+  cosumeDebugService: (serviceProvider) ->
+    console.log('Consume service provider:', serviceProvider)
+    @consoleView.setDebugServiceProvider(serviceProvider);

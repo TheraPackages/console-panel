@@ -66,8 +66,8 @@
     }
   },
   "consumedServices": {
-    "thera-debug-protocol": {
-      "description": "",
+    "thera-service-provider": {
+      "description": "provide thera debug services",
       "versions": {
         "1.0.0": "cosumeDebugService"
       }

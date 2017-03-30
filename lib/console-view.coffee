@@ -263,10 +263,8 @@ class ConsoleView extends View
       selectView.options[0].selected = true
       @targetChanged(selectView)
 
-  setDebugService: (service) ->
-    @debugService = service
-    # subscribe service message here
-    # service
+  setDebugServiceProvider: (serviceProvider) ->
+    @debugServiceProvider = serviceProvider
 
   inputChanged: (view) ->
     # TODO: suggest prompt here
@@ -288,11 +286,12 @@ class ConsoleView extends View
       console.log(e)
 
   evaluateExpression: (expression) ->
-    if not @debugService
+    service = @debugServiceProvider?.currentProvider()
+    if not service
       @log('Debug service not available!', 'error')
       return
     try
-      promise = @debugService.runtimeEvaluate(expression, 'REPL')
+      promise = service.runtimeEvaluate(expression, 'REPL')
       promise.then((res) => @evaluateSuccess(res)).catch((err) => @evaluateFail(err));
     catch error
       console.error(error);
@@ -345,14 +344,15 @@ class ConsoleView extends View
     return false
 
   getProperties: (holder, objectId) ->
-    if not @debugService
+    service = @debugServiceProvider?.currentProvider()
+    if not service
       @log('Debug service not available !', 'error');
       return
     else if not objectId
       @log('objectId cannot be empty !', 'error')
       return
     try
-      promise = @debugService.getProperties(objectId)
+      promise = service.getProperties(objectId)
       promise.then((res) => @propertySuccess(holder, res)).catch((err) => @propertyFail(holder, err));
     catch error
       console.error(error)
