@@ -18,8 +18,8 @@ class ConsoleView extends View
           @span 'Oreo-Server was running',style:"color:rgb(60,184,121)", id: 'oreo-server-status'
 
 
-      @div id:'tabs',style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
-        @ul outlet: 'selectTabUl',=>
+      @div id:'tabs', style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
+        @ul style:"height: 38px;", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
               @span class:'fa fa-exclamation-triangle'
@@ -36,7 +36,6 @@ class ConsoleView extends View
               @span class:'fa fa-bars'
 
           @li class:'fa fa-trash-o logclearButton button hvr-grow',outlet: 'consoleClearButton', click: 'clear'
-
 
         @div id:'tabs-1', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body', =>
@@ -70,8 +69,9 @@ class ConsoleView extends View
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
-    $ ->  # Bring the whole bottom panel front to overlay panes's file tab.
+    $ =>  # Bring the whole bottom panel front to overlay panes's file tab.
       $('#atom-console').parent().parent().addClass('z-index-3')
+      $('#tabs').height(@tabHeight + 38)
 
     @input[0].addEventListener('input', (e) => @inputChanged(e.currentTarget))
     @input[0].addEventListener('keydown', (e) => @inputKeyDown(e))
@@ -134,6 +134,8 @@ class ConsoleView extends View
     if atomConsole.offset().top + atomConsole.outerHeight() + 26 + 3 >= $(document.body).height() and pageY <= atomConsole.offset().top
       @tabHeight = $(document.body).height() - atomConsole.offset().top - @heading.outerHeight() - @selectTabUl.outerHeight() - 26 - 4
 
+    # Set height explicitly to force editor to account for the tab height when adjust area at bottom
+    $('#tabs').height(@tabHeight + @selectTabUl.outerHeight())
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
 
