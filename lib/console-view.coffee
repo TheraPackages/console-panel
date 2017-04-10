@@ -68,6 +68,9 @@ class ConsoleView extends View
     @tabHeight = serializeState?.height || 200
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
+    pre.css('minHeight', @tabHeight - 18) for pre in [@output]
+    pre.css('minHeight', @tabHeight) for pre in [@output4Debugger, @output4Device, @output4SubPreview]
+
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
     $ =>  # Bring the whole bottom panel front to overlay panes's file tab.
       $('#atom-console').parent().parent().addClass('z-index-3')
@@ -138,6 +141,8 @@ class ConsoleView extends View
     $('#tabs').height(@tabHeight + @selectTabUl.outerHeight())
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
+    pre.css('minHeight', @tabHeight - 18) for pre in [@output]
+    pre.css('minHeight', @tabHeight) for pre in [@output4Debugger, @output4Device, @output4SubPreview]
 
   resizeToFitContent: ->
     @selectedTab = $('#tabs').tabs('option', 'active')
