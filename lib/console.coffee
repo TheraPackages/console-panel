@@ -11,6 +11,7 @@ Array::last ?= (n) ->
 module.exports = Console =
   consoleView: null
   subscriptions: null
+  debuggerService: null
 
   activate: (state) ->
     @consoleView = new ConsoleView(state.consoleViewState)
@@ -45,3 +46,8 @@ module.exports = Console =
 
   provideConsolePanel: ->
     @consoleManager
+
+  # Service container: [weex, luaview]
+  cosumeDebugService: (serviceProvider) ->
+    console.log('Consume service provider:', serviceProvider)
+    @consoleView.setDebugServiceProvider(serviceProvider);

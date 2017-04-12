@@ -70,6 +70,7 @@
 			&:empty {
 				padding: 0;
 			}
+			margin: 0px;
 			font-size:14px;
 			background: rgb(29,31,33);
 			border-width: 0 !important;
@@ -94,6 +95,78 @@
 				color: @text-color-subtle;
 			}
 		}
+
+		span {
+			margin: 0;
+			display: block;
+			// word-break: normal;
+			// width: auto;
+			// white-space: pre-wrap;
+			// word-wrap: break-word;
+			// overflow: hidden;
+		}
+	}
+}
+
+.z-index-3 {
+	z-index: 3;
+}
+
+.repl-bar {
+	background-color: #2f384c;
+	span {
+		width: 16px;
+		height: 16px;
+		float: left;
+		margin-top: 3px;
+		color: #4a7ce9;
+		text-align: center;
+	}
+	div {
+		overflow: hidden;
+		height: 18px;
+
+		input {
+			height: 18px;
+			width: 100%;
+			border-style: solid;
+			border-width: 0px;
+			padding-left: 4px;
+			padding-right: 4px;
+			color: #ffffff;
+			background-color: transparent;
+		}
+	}
+}
+
+.evaluate-result-expand-icon {
+  color: hsl(60, 70%, 50%);
+	text-align: center;
+  font-size: 12px !important;
+	width: 20px;
+	padding-top: 4px;
+}
+
+.evaluate-result-collapse-icon {
+	color: hsl(40, 70%, 50%);
+	text-align: center;
+  font-size: 12px !important;
+	width: 20px;
+	padding-top: 4px;
+}
+
+.evaluate-result-empty-icon {
+	width: 20px;
+	padding-top: 4px;
+}
+
+.eval-block {
+	span {
+		float: left;
+	}
+	div {
+		overflow: hidden;
+		height: auto;
 	}
 }
 
