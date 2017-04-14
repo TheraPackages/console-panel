@@ -133,8 +133,8 @@ class ConsoleView extends View
     @tabHeight = 0 if @tabHeight < 0
 
     atomConsole = $('#atom-console')  # 26 for status bar at bottom
-    # If panel has reach the top? 26px for status bar, 3px for margin
-    if atomConsole.offset().top + atomConsole.outerHeight() + 26 + 3 >= $(document.body).height() and pageY <= atomConsole.offset().top
+    # If panel has reached the top? 26px for status bar
+    if atomConsole.offset().top + atomConsole.outerHeight() + 26 >= $(document.body).height() and pageY <= atomConsole.offset().top
       @tabHeight = $(document.body).height() - atomConsole.offset().top - @heading.outerHeight() - @selectTabUl.outerHeight() - 26 - 4
 
     # Set height explicitly to force editor to account for the tab height when adjust area at bottom
