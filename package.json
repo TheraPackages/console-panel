@@ -42,8 +42,11 @@
   "dependencies": {
     "atom-space-pen-views": "^2.0.3",
     "event-kit": "^1.0.0",
-    "q": "~1.0.1",
     "jquery": "2.1.4",
+    "q": "~1.0.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-infinite": "^0.10.0",
     "thera-debug-common-types": "~0.1.7"
   },
   "description": "Read only log console panel",

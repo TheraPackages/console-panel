@@ -4,10 +4,6 @@ Emitter = null
 module.exports =
 	class ConsoleManager
 		constructor: (@view) ->
-			#@emitter = new Emitter
-
-		destroy: ->
-			#@emitter.dispose()
 
 		# Toggle console panel
 		toggle: ->

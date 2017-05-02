@@ -2,6 +2,12 @@
 $ = window.$ = window.jQuery = require 'jquery'
 require './jquery-ui.js'
 { ReplHistory } = require './console-repl'
+ReuseList = require './reuseList'
+ReactDOM = require 'react-dom'
+React = require 'react'
+LogModel = require './logModel'
+
+logcatModel = new LogModel()
 
 module.exports =
 class ConsoleView extends View
@@ -37,23 +43,23 @@ class ConsoleView extends View
 
           @li class:'fa fa-trash-o logclearButton button hvr-grow',outlet: 'consoleClearButton', click: 'clear'
 
-        @div id:'tabs-1', =>
-          @div class: 'panel-body closed view-scroller', outlet: 'body', =>
-            @pre class: 'native-key-bindings', outlet: 'output', tabindex: -1
+        @div class: 'thera-console', id:'tabs-1', =>
+          # @div class: 'panel-body closed view-scroller', outlet: 'body'
+          @div class: 'panel-body closed view-scroller', id:'tab-logcat', outlet: 'body'
           @div class: 'repl-bar', =>
             @span class: 'fa fa-chevron-right'
             @div => # https://www.zhihu.com/question/37208845
               @input class: 'native-key-bindings', type: 'text', outlet: 'input'
 
-        @div id:'tabs-2', =>
+        @div class: 'thera-console', id:'tabs-2', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4Debugger', =>
             @pre class: 'native-key-bindings', outlet: 'output4Debugger', tabindex: -1
 
-        @div id:'tabs-3', =>
+        @div class: 'thera-console', id:'tabs-3', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4Device', =>
             @pre class: 'native-key-bindings', outlet: 'output4Device', tabindex: -1
 
-        @div id:'tabs-4', =>
+        @div class: 'thera-console', id:'tabs-4', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body4SubPreview', =>
             @pre class: 'native-key-bindings', outlet: 'output4SubPreview', tabindex: -1
 
@@ -62,14 +68,21 @@ class ConsoleView extends View
         hide: { effect: "blind", duration: 0 }
         show: { effect: "blind", duration: 0 }
         })
+
+      ReactDOM.render(React.createElement(ReuseList, {
+        model: logcatModel
+        }),
+       document.getElementById('tab-logcat'))
       return
 
   initialize: (serializeState) ->
     @tabHeight = serializeState?.height || 200
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
-    pre.css('minHeight', @tabHeight - 18) for pre in [@output]
+    # pre.css('minHeight', @tabHeight - 18) for pre in [@output]
     pre.css('minHeight', @tabHeight) for pre in [@output4Debugger, @output4Device, @output4SubPreview]
+
+    logcatModel.setContainerHeight(@tabHeight - 18)
 
     @targetSelect.change((e) => @targetChanged(e.currentTarget))
     $ =>  # Bring the whole bottom panel front to overlay panes's file tab.
@@ -83,27 +96,17 @@ class ConsoleView extends View
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
 
-
-  # Returns an object that can be retrieved when package is activated
-  # serialize: ->
-    #test use it...
-    #height: @body.height
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9eb -[UIApplication sendAction:to:from:forEvent:] + 62','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9a7 -[UIApplication sendAction:toTarget:fromSender:forEvent:] + 30','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['#define FeLogError(format,...)        writeCinLog(__FUNCTION__,CinLogLevelError,format,##__VA_ARGS__)','error'])
-
   # Tear down any state and detach
   destroy: ->
     @disposables?.dispose()
 
   show: ->
     @panel.show()
-    $('#atom-console').show('blind', null, 300, null)
+    # $('#atom-console').show('blind', null, 300, null)
+    $('#atom-console').show()
 
   hide: ->
-    $('#atom-console').hide('blind', null, 300, null)
+    $('#atom-console').hide()
 
   toggle: ->
     if $('#atom-console').is(":visible")
@@ -141,8 +144,9 @@ class ConsoleView extends View
     $('#tabs').height(@tabHeight + @selectTabUl.outerHeight())
     tab.height(@tabHeight - 18) for tab in [@body]    # 18px height for REPL bar
     tab.height(@tabHeight) for tab in [@body4Debugger, @body4Device, @body4SubPreview]
-    pre.css('minHeight', @tabHeight - 18) for pre in [@output]
+    # pre.css('minHeight', @tabHeight - 18) for pre in [@output]
     pre.css('minHeight', @tabHeight) for pre in [@output4Debugger, @output4Device, @output4SubPreview]
+    logcatModel.setContainerHeight(@tabHeight - 18)
 
   resizeToFitContent: ->
     @selectedTab = $('#tabs').tabs('option', 'active')
@@ -160,12 +164,13 @@ class ConsoleView extends View
     at_bottom = (@body.scrollTop() + @body.innerHeight() + 10 > @body[0].scrollHeight)
 
     if typeof message == 'string'
-      @output.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
-    else if typeof message == 'object' and message.evalLog
-      @evalObject(message, level)
-    else
-      @output.append message
+      logcatModel.push(React.createElement("p", {className: 'log-message level-' + level}, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message))
+      # @output.append $$ ->
+      #   @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+    # else if typeof message == 'object' and message.evalLog
+    #   @evalObject(message, level)
+    # else
+    #   @output.append message
 
     if at_bottom
       @body.scrollTop(@body[0].scrollHeight)
@@ -176,7 +181,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Debugger.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Debugger.append message
 
@@ -189,7 +194,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Device.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Device.append message
 
@@ -436,3 +441,11 @@ class ConsoleView extends View
       $ ->
         holder = $('#'+holderId)
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
+
+  find: (event) ->
+    activePanel = $('.thera-console').filter((index, ele) -> ele.style.display isnt 'none')[0]
+    $(activePanel).append $$ ->
+      @div class: 'find-bar', =>
+        @p =>
+          @input class: 'native-key-bindings', type: 'text', outlet: 'input'
+          @button 'Find'
