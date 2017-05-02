@@ -26,8 +26,10 @@ class ReuseList extends React.Component {
   }
 
   render () {
-    return <Infinite elementHeight={20}
-                     containerHeight={this.state.containerHeight}>
+    return <Infinite
+      className='reuse-list'
+      elementHeight={20}
+      containerHeight={this.state.containerHeight}>
       {this.state.elements}
     </Infinite>
   }

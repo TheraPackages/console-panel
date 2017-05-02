@@ -66,7 +66,7 @@
 		cursor: text;
 		-webkit-user-select: text;
 
-		pre {
+		pre, .reuse-list {
 			&:empty {
 				padding: 0;
 			}
@@ -74,6 +74,14 @@
 			font-size:14px;
 			background: rgb(29,31,33);
 			border-width: 0 !important;
+		}
+
+		.reuse-list p{
+			font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+		}
+
+		.reuse-list {
+			padding: 8px;
 		}
 
 		p {
@@ -87,8 +95,8 @@
 				color: @text-color-warning;
 			}
 
-			&.level-notice {
-				color: @text-color-info;
+			&.level-info, &.level-log {
+				color: #9da5b4;
 			}
 
 			&.level-debug {

@@ -43,9 +43,9 @@ class ConsoleView extends View
 
           @li class:'fa fa-trash-o logclearButton button hvr-grow',outlet: 'consoleClearButton', click: 'clear'
 
-        @div class: 'thera-console', id:'tabs-1', =>
+        @div class: 'thera-console native-key-bindings', id:'tabs-1', tabindex:'-1',=>
           # @div class: 'panel-body closed view-scroller', outlet: 'body'
-          @div class: 'panel-body closed view-scroller', id:'tab-logcat', outlet: 'body'
+          @div class: 'panel-body closed view-scroller ', id:'tab-logcat', outlet: 'body'
           @div class: 'repl-bar', =>
             @span class: 'fa fa-chevron-right'
             @div => # https://www.zhihu.com/question/37208845
