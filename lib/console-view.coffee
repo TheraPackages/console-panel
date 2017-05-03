@@ -199,6 +199,12 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
+      
+      
+  changeLogcatToDevice:(deviceName)->
+    @output.empty()
+    deviceInfo  = 'current device: '+deviceName
+    @output.append deviceInfo
 
   js_yyyy_mm_dd_hh_mm_ss = ->
     now = new Date
