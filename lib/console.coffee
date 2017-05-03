@@ -24,9 +24,6 @@ module.exports = Console =
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:toggle': =>
       @consoleManager.toggle()
 
-    @subscriptions.add atom.commands.add 'atom-workspace', 'console.targets': ({detail}) =>
-      @consoleView.updateTargets(detail)
-
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:log': ({detail}) =>
       @consoleView.log(detail.first(),detail.last())
 
