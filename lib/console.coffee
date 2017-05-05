@@ -36,13 +36,15 @@ module.exports = Console =
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:devicelog': ({detail}) =>
       @consoleView.log4Device(detail.first(),detail.last())
 
+    @subscriptions.add atom.commands.add 'atom-workspace', 'console:find': (event) =>
+      @consoleView.find(event)
 
+    @subscriptions.add atom.commands.add 'atom-workspace', 'console:close-find': (event) =>
+      @consoleView.closeFind(event)
+      
   deactivate: ->
     @subscriptions.dispose()
     @consoleView.destroy()
-
-  # serialize: ->
-  #   consoleViewState: @consoleView.serialize()
 
   provideConsolePanel: ->
     @consoleManager

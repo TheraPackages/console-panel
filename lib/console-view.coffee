@@ -37,9 +37,9 @@ class ConsoleView extends View
 
           @li class:'fa fa-trash-o logclearButton button hvr-grow',outlet: 'consoleClearButton', click: 'clear'
 
-        @div id:'tabs-1', =>
+        @div id:'tabs-1', class: 'thera-console', =>
           @div class: 'panel-body closed view-scroller', outlet: 'body', =>
-            @pre class: 'native-key-bindings', outlet: 'output', tabindex: -1
+            @pre class: 'thera-log native-key-bindings', outlet: 'output', tabindex: -1
           @div class: 'repl-bar', =>
             @span class: 'fa fa-chevron-right'
             @div => # https://www.zhihu.com/question/37208845
@@ -436,3 +436,68 @@ class ConsoleView extends View
       $ ->
         holder = $('#'+holderId)
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
+
+  find: (event) ->
+    if $('.thera-find-bar').length is 0
+      @indexToFind = undefined
+      activePanel = $('.thera-console').filter((index, ele) -> ele.style.display isnt 'none')[0]
+      $(activePanel).append $$ ->
+        @div class: 'thera-find-bar', =>
+          @p =>
+            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find'
+            # @button click: 'findClick'
+
+      $('#console-find-input').keypress((event) => @findPress(event))
+
+    $('#console-find-input').focus()
+
+  closeFind: (event) ->
+    @clearFindResult()
+    @indexToFind = undefined
+    $('.thera-find-bar').remove()
+
+  findPress: (event) ->
+    if event.which is 13 # enter key
+      stringToFind = atom.document.getElementById('console-find-input').value
+      @clearFindResult()
+      if event.shiftKey
+        @findLast(stringToFind)
+      else
+        @findNext(stringToFind)
+
+  findLast: (stringToFind) ->
+    @clearFindResult()
+
+    if @indexToFind is undefined
+      @indexToFind = 1
+
+    --@indexToFind
+    @startFind(stringToFind, @indexToFind)
+
+
+  findNext: (stringToFind) ->
+    @clearFindResult()
+
+    if @indexToFind is undefined
+      @indexToFind = -1
+
+    ++@indexToFind
+    @startFind(stringToFind, @indexToFind)
+
+
+  startFind: (stringToFind, highlightIndex) ->
+    array = $("p:contains('"+stringToFind+"')")
+    array.each( (i, element) ->
+      content = $(element).text()
+
+      if i is ((highlightIndex + array.length * 100) % array.length)
+        element.innerHTML = content.replace( stringToFind, '<span class="search-found highlight">' + stringToFind + '</span>' )
+        element.scrollIntoView()
+      else
+        element.innerHTML = content.replace( stringToFind, '<span class="search-found">' + stringToFind + '</span>' )
+    )
+
+  clearFindResult: ->
+    $('span.search-found').each((i, element) ->
+      $(element).replaceWith($(element).text())
+    )
