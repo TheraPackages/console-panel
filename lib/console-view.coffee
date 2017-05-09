@@ -444,7 +444,7 @@ class ConsoleView extends View
       $(activePanel).append $$ ->
         @div class: 'thera-find-bar', =>
           @p =>
-            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find'
+            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'find'
             # @button click: 'findClick'
 
       $('#console-find-input').keypress((event) => @findPress(event))
