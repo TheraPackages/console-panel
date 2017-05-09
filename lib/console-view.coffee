@@ -12,7 +12,7 @@ class ConsoleView extends View
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
       @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading'
       @div id:'tabs', style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
-        @ul style:"height: 38px;", outlet: 'selectTabUl',=>
+        @ul style:"height: 38px;", class: "thera-console-tab", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
               @span class:'fa fa-exclamation-triangle'
@@ -199,8 +199,8 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
-      
-      
+
+
   changeLogcatToDevice:(deviceName)->
     @output.empty()
     deviceInfo  = 'current device: '+deviceName
@@ -402,7 +402,7 @@ class ConsoleView extends View
   find: (event) ->
     if $('.thera-find-bar').length is 0
       @indexToFind = undefined
-      activePanel = $('.thera-console').filter((index, ele) -> ele.style.display isnt 'none')[0]
+      activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
       $(activePanel).append $$ ->
         @div class: 'thera-find-bar', =>
           @p =>
