@@ -10,14 +10,7 @@ class ConsoleView extends View
   @content: ->
     @div id: 'atom-console', class: 'view-resizer panel', outlet: 'atomConsole', =>
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
-      @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading', =>
-        #@button class: 'btn pull-right', click: 'clear', 'Clear'
-        @div class: 'panel-heading panel-simulator-info', =>
-          @select class: 'target-selector', name: 'targetSelect', outlet: 'targetSelect', =>
-          @span class:'fa fa-heartbeat',style:"color:rgb(60,184,121)"
-          @span 'Oreo-Server was running',style:"color:rgb(60,184,121)", id: 'oreo-server-status'
-
-
+      @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading'
       @div id:'tabs', style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
         @ul style:"height: 38px;", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
@@ -71,7 +64,6 @@ class ConsoleView extends View
     pre.css('minHeight', @tabHeight - 18) for pre in [@output]
     pre.css('minHeight', @tabHeight) for pre in [@output4Debugger, @output4Device, @output4SubPreview]
 
-    @targetSelect.change((e) => @targetChanged(e.currentTarget))
     $ =>  # Bring the whole bottom panel front to overlay panes's file tab.
       $('#atom-console').parent().parent().addClass('z-index-3')
       $('#tabs').height(@tabHeight + 38)
@@ -207,6 +199,12 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
+      
+      
+  changeLogcatToDevice:(deviceName)->
+    @output.empty()
+    deviceInfo  = 'current device: '+deviceName
+    @output.append deviceInfo
 
   js_yyyy_mm_dd_hh_mm_ss = ->
     now = new Date
@@ -233,42 +231,6 @@ class ConsoleView extends View
 
     "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
     # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
-
-
-  targetChanged: (selector) ->
-    selectedOption = selector.options[selector.options.selectedIndex];
-    target = selectedOption.tag;
-    atom.commands.dispatch(atom.views.getView(atom.workspace), "thera-debugger:debugger:main-device", target);
-
-  updateTargets: (targets) ->
-    targets = targets || [];
-    selectView = @targetSelect[0];  # <select/>
-    options = selectView.options    # [<option/>]
-    # Remember current selected target.
-    selectedOption = options[options.selectedIndex]
-    selectedTarget = if selectedOption then selectedOption.tag else null
-
-    prvTargetIndex = -1; # Previous connected target is still there.
-    @targetSelect.empty()
-    for target, i in targets
-      do (target, i) =>
-        option = document.createElement('option')
-        option.text = "#{target.model} - #{target.deviceId.split('|')[1]} - #{target.weexVersion}"
-        option.val = target.deviceId
-        option.tag = target
-        selectView.add(option);
-        if selectedTarget and selectedTarget.deviceId == target.deviceId
-          prvTargetIndex = i;
-
-    if targets.length == 0  # Clear shadow...
-      selectView.add(document.createElement('option'))
-      @targetSelect.empty()
-
-    if prvTargetIndex >= 0      # Keep previous selected option
-      selectView.options[prvTargetIndex].selected = true
-    else if targets.length > 0  # Select first option by default
-      selectView.options[0].selected = true
-      @targetChanged(selectView)
 
   setDebugServiceProvider: (serviceProvider) ->
     @debugServiceProvider = serviceProvider
