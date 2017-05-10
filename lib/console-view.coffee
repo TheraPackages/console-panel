@@ -75,17 +75,6 @@ class ConsoleView extends View
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
 
-
-  # Returns an object that can be retrieved when package is activated
-  # serialize: ->
-    #test use it...
-    #height: @body.height
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9eb -[UIApplication sendAction:to:from:forEvent:] + 62','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9a7 -[UIApplication sendAction:toTarget:fromSender:forEvent:] + 30','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['#define FeLogError(format,...)        writeCinLog(__FUNCTION__,CinLogLevelError,format,##__VA_ARGS__)','error'])
-
   # Tear down any state and detach
   destroy: ->
     @disposables?.dispose()
@@ -153,7 +142,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else if typeof message == 'object' and message.evalLog
       @evalObject(message, level)
     else
@@ -168,7 +157,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Debugger.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Debugger.append message
 
@@ -181,7 +170,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Device.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Device.append message
 
@@ -448,7 +437,7 @@ class ConsoleView extends View
 
 
   startFind: (stringToFind, highlightIndex) ->
-    array = $("p:contains('"+stringToFind+"')")
+    array = $("p.searchable:contains('"+stringToFind+"')")
     array.each( (i, element) ->
       content = $(element).text()
 
