@@ -10,6 +10,6 @@
 'atom-workspace':
   'ctrl-alt-c': 'console:toggle'
 
-'.thera-console':
+'#atom-console':
   'cmd-f': 'console:find'
-  'esc': 'console:close-find'
+  'escape': 'console:close-find'

@@ -24,9 +24,6 @@ module.exports = Console =
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:toggle': =>
       @consoleManager.toggle()
 
-    @subscriptions.add atom.commands.add 'atom-workspace', 'console.targets': ({detail}) =>
-      @consoleView.updateTargets(detail)
-
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:log': ({detail}) =>
       @consoleView.log(detail.first(),detail.last())
 
@@ -39,6 +36,11 @@ module.exports = Console =
     @subscriptions.add atom.commands.add 'atom-workspace', 'console:find': (event) =>
       @consoleView.find(event)
 
+    @subscriptions.add atom.commands.add 'atom-workspace', 'console:changeLogDevice': ({detail}) =>
+      @consoleView.changeLogcatToDevice(detail)
+
+    @subscriptions.add atom.commands.add 'atom-workspace', 'console:close-find': (event) =>
+      @consoleView.closeFind(event)
 
   deactivate: ->
     @subscriptions.dispose()

@@ -16,16 +16,9 @@ class ConsoleView extends View
   @content: ->
     @div id: 'atom-console', class: 'view-resizer panel', outlet: 'atomConsole', =>
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
-      @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading', =>
-        #@button class: 'btn pull-right', click: 'clear', 'Clear'
-        @div class: 'panel-heading panel-simulator-info', =>
-          @select class: 'target-selector', name: 'targetSelect', outlet: 'targetSelect', =>
-          @span class:'fa fa-heartbeat',style:"color:rgb(60,184,121)"
-          @span 'Oreo-Server was running',style:"color:rgb(60,184,121)", id: 'oreo-server-status'
-
-
+      @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading'
       @div id:'tabs', style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
-        @ul style:"height: 38px;", outlet: 'selectTabUl',=>
+        @ul style:"height: 38px;", class: "thera-console-tab", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
               @span class:'fa fa-exclamation-triangle'
@@ -136,8 +129,8 @@ class ConsoleView extends View
     @tabHeight = 0 if @tabHeight < 0
 
     atomConsole = $('#atom-console')  # 26 for status bar at bottom
-    # If panel has reach the top? 26px for status bar, 3px for margin
-    if atomConsole.offset().top + atomConsole.outerHeight() + 26 + 3 >= $(document.body).height() and pageY <= atomConsole.offset().top
+    # If panel has reached the top? 26px for status bar
+    if atomConsole.offset().top + atomConsole.outerHeight() + 26 >= $(document.body).height() and pageY <= atomConsole.offset().top
       @tabHeight = $(document.body).height() - atomConsole.offset().top - @heading.outerHeight() - @selectTabUl.outerHeight() - 26 - 4
 
     # Set height explicitly to force editor to account for the tab height when adjust area at bottom
@@ -164,7 +157,7 @@ class ConsoleView extends View
     at_bottom = (@body.scrollTop() + @body.innerHeight() + 10 > @body[0].scrollHeight)
 
     if typeof message == 'string'
-      logcatModel.push(React.createElement("p", {className: 'log-message level-' + level}, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message))
+      logcatModel.push(React.createElement("p", {className: 'searchable level-' + level}, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message))
       # @output.append $$ ->
       #   @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     # else if typeof message == 'object' and message.evalLog
@@ -181,7 +174,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Debugger.append $$ ->
-        @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Debugger.append message
 
@@ -194,7 +187,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Device.append $$ ->
-        @p class: 'log-message level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Device.append message
 
@@ -212,6 +205,12 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
+
+
+  changeLogcatToDevice:(deviceName)->
+    @output.empty()
+    deviceInfo  = 'current device: '+deviceName
+    @output.append deviceInfo
 
   js_yyyy_mm_dd_hh_mm_ss = ->
     now = new Date
@@ -238,42 +237,6 @@ class ConsoleView extends View
 
     "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
     # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
-
-
-  targetChanged: (selector) ->
-    selectedOption = selector.options[selector.options.selectedIndex];
-    target = selectedOption.tag;
-    atom.commands.dispatch(atom.views.getView(atom.workspace), "thera-debugger:debugger:main-device", target);
-
-  updateTargets: (targets) ->
-    targets = targets || [];
-    selectView = @targetSelect[0];  # <select/>
-    options = selectView.options    # [<option/>]
-    # Remember current selected target.
-    selectedOption = options[options.selectedIndex]
-    selectedTarget = if selectedOption then selectedOption.tag else null
-
-    prvTargetIndex = -1; # Previous connected target is still there.
-    @targetSelect.empty()
-    for target, i in targets
-      do (target, i) =>
-        option = document.createElement('option')
-        option.text = "#{target.model} - #{target.deviceId.split('|')[1]} - #{target.weexVersion}"
-        option.val = target.deviceId
-        option.tag = target
-        selectView.add(option);
-        if selectedTarget and selectedTarget.deviceId == target.deviceId
-          prvTargetIndex = i;
-
-    if targets.length == 0  # Clear shadow...
-      selectView.add(document.createElement('option'))
-      @targetSelect.empty()
-
-    if prvTargetIndex >= 0      # Keep previous selected option
-      selectView.options[prvTargetIndex].selected = true
-    else if targets.length > 0  # Select first option by default
-      selectView.options[0].selected = true
-      @targetChanged(selectView)
 
   setDebugServiceProvider: (serviceProvider) ->
     @debugServiceProvider = serviceProvider
@@ -443,9 +406,66 @@ class ConsoleView extends View
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
 
   find: (event) ->
-    activePanel = $('.thera-console').filter((index, ele) -> ele.style.display isnt 'none')[0]
-    $(activePanel).append $$ ->
-      @div class: 'find-bar', =>
-        @p =>
-          @input class: 'native-key-bindings', type: 'text', outlet: 'input'
-          @button 'Find'
+    if $('.thera-find-bar').length is 0
+      @indexToFind = undefined
+      activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
+      $(activePanel).append $$ ->
+        @div class: 'thera-find-bar', =>
+          @p =>
+            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
+            # @button click: 'findClick'
+
+      $('#console-find-input').keypress((event) => @findPress(event))
+
+    $('#console-find-input').focus()
+
+  closeFind: (event) ->
+    @clearFindResult()
+    @indexToFind = undefined
+    $('.thera-find-bar').remove()
+
+  findPress: (event) ->
+    if event.which is 13 # enter key
+      stringToFind = atom.document.getElementById('console-find-input').value
+      @clearFindResult()
+      if event.shiftKey
+        @findLast(stringToFind)
+      else
+        @findNext(stringToFind)
+
+  findLast: (stringToFind) ->
+    @clearFindResult()
+
+    if @indexToFind is undefined
+      @indexToFind = 1
+
+    --@indexToFind
+    @startFind(stringToFind, @indexToFind)
+
+
+  findNext: (stringToFind) ->
+    @clearFindResult()
+
+    if @indexToFind is undefined
+      @indexToFind = -1
+
+    ++@indexToFind
+    @startFind(stringToFind, @indexToFind)
+
+
+  startFind: (stringToFind, highlightIndex) ->
+    array = $("p.searchable:contains('"+stringToFind+"')")
+    array.each( (i, element) ->
+      content = $(element).text()
+
+      if i is ((highlightIndex + array.length * 100) % array.length)
+        element.innerHTML = content.replace( stringToFind, '<span class="search-found highlight">' + stringToFind + '</span>' )
+        element.scrollIntoView()
+      else
+        element.innerHTML = content.replace( stringToFind, '<span class="search-found">' + stringToFind + '</span>' )
+    )
+
+  clearFindResult: ->
+    $('span.search-found').each((i, element) ->
+      $(element).replaceWith($(element).text())
+    )

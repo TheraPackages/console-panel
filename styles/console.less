@@ -47,6 +47,7 @@
 
 		.panel-heading {
 			padding: 2px;
+			background: #15191b;
 		}
 
 		&.closed {
@@ -71,7 +72,7 @@
 				padding: 0;
 			}
 			margin: 0px;
-			font-size:14px;
+			font-size:12px;
 			background: rgb(29,31,33);
 			border-width: 0 !important;
 		}
@@ -100,7 +101,7 @@
 			}
 
 			&.level-debug {
-				color: @text-color-subtle;
+				color: #bbbbbb;
 			}
 		}
 
@@ -284,4 +285,30 @@ a.mover{
 #atom-console .panel-body p {
 	-webkit-user-select: text;
 	user-select: text;
+}
+
+.thera-find-bar {
+	padding: 8px;
+	position: absolute;
+	z-index: 1001;
+	top: 0px;
+	right: 52px;
+}
+
+#atom-console span.search-found {
+	display: inline;
+	background: green;
+	color: black;
+}
+
+#atom-console span.search-found.hightlight {
+	display: inline;
+	background: red;
+	color: black;
+}
+
+input#console-find-input {
+	color: #f9f6f6;
+  background: #090b0d;
+	font-weight: normal;
 }
