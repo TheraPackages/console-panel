@@ -63,9 +63,11 @@ class ConsoleView extends View
         })
 
       ReactDOM.render(React.createElement(ReuseList, {
+        elementHeight: 19,
         model: logcatModel
         }),
-       document.getElementById('tab-logcat'))
+        document.getElementById('tab-logcat')
+      )
       return
 
   initialize: (serializeState) ->
@@ -77,7 +79,7 @@ class ConsoleView extends View
 
     logcatModel.setContainerHeight(@tabHeight - 18)
 
-    @targetSelect.change((e) => @targetChanged(e.currentTarget))
+    # @targetSelect.change((e) => @targetChanged(e.currentTarget))
     $ =>  # Bring the whole bottom panel front to overlay panes's file tab.
       $('#atom-console').parent().parent().addClass('z-index-3')
       $('#tabs').height(@tabHeight + 38)
@@ -207,10 +209,11 @@ class ConsoleView extends View
       @output4Device.empty()
 
 
-  changeLogcatToDevice:(deviceName)->
-    @output.empty()
-    deviceInfo  = 'current device: '+deviceName
-    @output.append deviceInfo
+  changeLogcatToDevice: (deviceName)->
+    # @output.empty()
+    deviceInfo  = 'current device: ' + deviceName
+    # @output.append deviceInfo
+    logcatModel.push(React.createElement("p", {className: 'searchable level-info'}, js_yyyy_mm_dd_hh_mm_ss() + ' ' + deviceInfo))
 
   js_yyyy_mm_dd_hh_mm_ss = ->
     now = new Date
@@ -236,7 +239,6 @@ class ConsoleView extends View
       millis = (if millis.length == 2 then '0' else '00') + millis
 
     "#{month}-#{day} #{hour}:#{minute}:#{second}.#{millis}"
-    # year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + now.getMilliseconds()
 
   setDebugServiceProvider: (serviceProvider) ->
     @debugServiceProvider = serviceProvider

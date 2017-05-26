@@ -4,6 +4,8 @@
 const Infinite = require('react-infinite')
 const React = require('react')
 
+const defaultElementHeight = 19
+
 module.exports =
 class ReuseList extends React.Component {
   constructor (props) {
@@ -11,7 +13,8 @@ class ReuseList extends React.Component {
     this.model = props.model
     this.state = {
       elements: this.model.elements,
-      containerHeight: this.model.containerHeight
+      containerHeight: this.model.containerHeight,
+      elementHeight: props.elementHeight || defaultElementHeight
     }
   }
 
@@ -28,7 +31,7 @@ class ReuseList extends React.Component {
   render () {
     return <Infinite
       className='reuse-list'
-      elementHeight={20}
+      elementHeight={this.state.elementHeight}
       containerHeight={this.state.containerHeight}>
       {this.state.elements}
     </Infinite>
