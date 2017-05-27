@@ -82,6 +82,15 @@ class ConsoleView extends View
   show: ->
     @panel.show()
     $('#atom-console').show('blind', null, 300, null)
+    activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
+    $(activePanel).append $$ ->
+      @div class: 'thera-find-bar', =>
+        @p =>
+          @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
+          # @button click: 'findClick'
+
+    $('#console-find-input').keypress((event) => @findPress(event))
+
 
   hide: ->
     $('#atom-console').hide('blind', null, 300, null)
@@ -389,23 +398,25 @@ class ConsoleView extends View
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
 
   find: (event) ->
-    if $('.thera-find-bar').length is 0
-      @indexToFind = undefined
-      activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
-      $(activePanel).append $$ ->
-        @div class: 'thera-find-bar', =>
-          @p =>
-            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
-            # @button click: 'findClick'
-
-      $('#console-find-input').keypress((event) => @findPress(event))
-
     $('#console-find-input').focus()
+    # if $('.thera-find-bar').length is 0
+    #   @indexToFind = undefined
+      # activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
+      # $(activePanel).append $$ ->
+      #   @div class: 'thera-find-bar', =>
+      #     @p =>
+      #       @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
+      #       # @button click: 'findClick'
+      #
+      # $('#console-find-input').keypress((event) => @findPress(event))
+
+
 
   closeFind: (event) ->
     @clearFindResult()
     @indexToFind = undefined
-    $('.thera-find-bar').remove()
+    atom.document.getElementById('console-find-input').value = ""
+    # $('.thera-find-bar').remove()
 
   findPress: (event) ->
     if event.which is 13 # enter key
