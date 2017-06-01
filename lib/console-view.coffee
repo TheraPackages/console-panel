@@ -448,7 +448,7 @@ class ConsoleView extends View
 
 
   startFind: (stringToFind, highlightIndex) ->
-    array = $("p.searchable:contains('"+stringToFind+"')")
+    array = $("div.ui-tabs-panel:visible").find("p.searchable:contains('"+stringToFind+"')")
     array.each( (i, element) ->
       content = $(element).text()
 
