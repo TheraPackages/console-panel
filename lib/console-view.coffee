@@ -12,7 +12,7 @@ class ConsoleView extends View
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
       @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading'
       @div id:'tabs', style:"background:rgb(14,17,18);border-width:0;padding:2px;", =>
-        @ul style:"height: 38px;", outlet: 'selectTabUl',=>
+        @ul style:"height: 38px;", class: "thera-console-tab", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
               @span class:'fa fa-exclamation-triangle'
@@ -75,17 +75,6 @@ class ConsoleView extends View
     @panel = atom.workspace.addBottomPanel(item: @element, priority: 100, visible: false)
     @handleEvents()
 
-
-  # Returns an object that can be retrieved when package is activated
-  # serialize: ->
-    #test use it...
-    #height: @body.height
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9eb -[UIApplication sendAction:to:from:forEvent:] + 62','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c9a7 -[UIApplication sendAction:toTarget:fromSender:forEvent:] + 30','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['UIKit                               0x3748c985 -[UIControl sendAction:to:forEvent:] + 44','debug'])
-    #atom.commands.dispatch(atom.views.getView(atom.workspace), 'console:log',['#define FeLogError(format,...)        writeCinLog(__FUNCTION__,CinLogLevelError,format,##__VA_ARGS__)','error'])
-
   # Tear down any state and detach
   destroy: ->
     @disposables?.dispose()
@@ -93,6 +82,15 @@ class ConsoleView extends View
   show: ->
     @panel.show()
     $('#atom-console').show('blind', null, 300, null)
+    activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
+    $(activePanel).append $$ ->
+      @div class: 'thera-find-bar', =>
+        @p =>
+          @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
+          # @button click: 'findClick'
+
+    $('#console-find-input').keypress((event) => @findPress(event))
+
 
   hide: ->
     $('#atom-console').hide('blind', null, 300, null)
@@ -153,7 +151,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else if typeof message == 'object' and message.evalLog
       @evalObject(message, level)
     else
@@ -168,7 +166,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Debugger.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Debugger.append message
 
@@ -181,7 +179,7 @@ class ConsoleView extends View
 
     if typeof message == 'string'
       @output4Device.append $$ ->
-        @p class: 'level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
+        @p class: 'searchable level-' + level, js_yyyy_mm_dd_hh_mm_ss() + ' ' + message
     else
       @output4Device.append message
 
@@ -199,8 +197,8 @@ class ConsoleView extends View
       @output4Debugger.empty()
     else
       @output4Device.empty()
-      
-      
+
+
   changeLogcatToDevice:(deviceName)->
     @output.empty()
     deviceInfo  = 'current device: '+deviceName
@@ -400,23 +398,25 @@ class ConsoleView extends View
         $('#'+rowId).click(prop.value, self.expandClick.bind(self, holder))
 
   find: (event) ->
-    if $('.thera-find-bar').length is 0
-      @indexToFind = undefined
-      activePanel = $('.thera-console').filter((index, ele) -> ele.style.display isnt 'none')[0]
-      $(activePanel).append $$ ->
-        @div class: 'thera-find-bar', =>
-          @p =>
-            @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find'
-            # @button click: 'findClick'
-
-      $('#console-find-input').keypress((event) => @findPress(event))
-
     $('#console-find-input').focus()
+    # if $('.thera-find-bar').length is 0
+    #   @indexToFind = undefined
+      # activePanel = $('.thera-console-tab').filter((index, ele) -> ele.style.display isnt 'none')[0]
+      # $(activePanel).append $$ ->
+      #   @div class: 'thera-find-bar', =>
+      #     @p =>
+      #       @input id: 'console-find-input', class: 'native-key-bindings', type: 'text', outlet: 'find', placeholder:'Find in console'
+      #       # @button click: 'findClick'
+      #
+      # $('#console-find-input').keypress((event) => @findPress(event))
+
+
 
   closeFind: (event) ->
     @clearFindResult()
     @indexToFind = undefined
-    $('.thera-find-bar').remove()
+    atom.document.getElementById('console-find-input').value = ""
+    # $('.thera-find-bar').remove()
 
   findPress: (event) ->
     if event.which is 13 # enter key
@@ -448,7 +448,7 @@ class ConsoleView extends View
 
 
   startFind: (stringToFind, highlightIndex) ->
-    array = $("p:contains('"+stringToFind+"')")
+    array = $("div.ui-tabs-panel:visible").find("p.searchable:contains('"+stringToFind+"')")
     array.each( (i, element) ->
       content = $(element).text()
 
