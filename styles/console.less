@@ -47,7 +47,7 @@
 
 		.panel-heading {
 			padding: 2px;
-			background: #15191b;
+			background: @base-background-color;
 		}
 
 		&.closed {
@@ -114,7 +114,7 @@
 }
 
 .repl-bar {
-	background-color: #2f384c;
+	background-color: @base-background-color;
 	span {
 		width: 16px;
 		height: 16px;
@@ -228,7 +228,7 @@
 	padding: 0px !important;
 	display: block;
 	border-width: 0 !important;
-	background: rgb(29,31,33) !important;
+	background: @base-background-color !important;
 	position: relative;
 	// min-height: 100px;
 }
@@ -274,7 +274,7 @@ a.mover{
 	margin-top: 8px !important;
 	margin-right: 20px !important;
 	float: right !important;
-	color: rgb(116,148,163);
+	color: @text-color;
 	font-size: 20px !important;
 	cursor: pointer;
 }
@@ -299,18 +299,18 @@ a.mover{
 #atom-console span.search-found {
 	display: inline;
 	background: green;
-	color: black;
+	color: @base-background-color;
 }
 
 #atom-console span.search-found.hightlight {
 	display: inline;
 	background: red;
-	color: black;
+	color: @base-background-color;
 }
 
 input#console-find-input {
 	color: #f9f6f6;
-  background: #090b0d;
+  background: @input-background-color;
 	font-weight: normal;
-	border-color: #090b0d;
+	border-color: @base-background-color;
 }
