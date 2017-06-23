@@ -172,7 +172,7 @@
 
 .ui-tabs{
 	zoom: 1;
-	background: rgb(14,17,18);
+	background: @tab-background-color;
 	padding-top: 0;
 }
 .ui-tabs .ui-tabs-nav{
@@ -180,27 +180,34 @@
 	position: relative;
 	overflow:hidden;
 	z-index: 1000;
-	background: rgb(24,29,34);
+	background: @tab-background-color;
 	margin: 0;
 	padding: 0;
 	border-width: 0;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-active{
-	background: rgb(29,31,33);
+	background: @tab-background-color-active;
 }
 
 .ui-tabs .ui-tabs-nav li {
 	position: relative;
 	float: left;
 	margin: 0 0px -1px 0;
-	background: rgb(14,17,18);
-	border-color: rgb(19,21,23);
 	border-bottom-width: 0px;
-
-
+	background-color: @tab-bar-background-color;
 }
 
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a{
+	float: left;
+	text-decoration: none;
+	padding: 5px 10px ;
+	outline: medium none;
+	font-size:14px;
+	line-height:20px;
+	font-family: 'PT Sans Narrow', sans-serif;
+	color: @text-color-selected;
+}
 
 .ui-tabs .ui-tabs-nav li a {
 	float: left;
@@ -210,6 +217,7 @@
 	font-size:14px;
 	line-height:20px;
 	font-family: 'PT Sans Narrow', sans-serif;
+	color: @text-color;
 }
 
 
