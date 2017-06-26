@@ -11,7 +11,7 @@ class ConsoleView extends View
     @div id: 'atom-console', class: 'view-resizer panel', outlet: 'atomConsole', =>
       @div class: 'view-resize-handle', outlet: 'resizeHandle'
       @div class: 'panel-heading', dblclick: 'toggle', outlet: 'heading'
-      @div id:'tabs', style:"border-width:0;padding:2px;", =>
+      @div id:'tabs', style:"border-width:0;padding:0px;", =>
         @ul style:"height: 38px;", class: "thera-console-tab", outlet: 'selectTabUl',=>
           @li class:'button hvr-hang' ,=>
             @a href:'#tabs-1',' logcat', =>
